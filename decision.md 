@@ -1,0 +1,47 @@
+# Decisions
+
+## Stack
+Chose Python + scikit-learn TF-IDF for retrieval instead of an
+embedding model (e.g. sentence-transformers) or a vector DB (Chroma).
+Reason: zero setup dependencies, runs offline, installs in seconds,
+and is enough to prove the core requirement (grounded, cited
+answers with a refusal path) under a very tight build window.
+
+## Rejected: embeddings / vector DB
+Semantic embeddings (like the ChromaDB + LangGraph setup used in an
+earlier local RAG project) would handle paraphrased questions much
+better than TF-IDF keyword matching. Rejected for this build only
+because of time — first priority was a working, honest floor, not
+the strongest possible retrieval.
+
+## Rejected: LLM-generated answers
+The assistant returns the clause text directly rather than having an
+LLM rephrase it. This is deliberate, not just a time-cut: returning
+the source text verbatim is the safest way to guarantee the answer
+never says something the manual doesn't. An LLM rephrasing step
+would read more natural but adds a risk of it drifting from what the
+clause actually says.
+
+## Confidence threshold
+Set to 0.20 after testing. At 0.15, an unrelated question ("free
+birthday cake") false-matched a real clause with an accessibility
+answer. Raised the threshold until clearly off-topic questions were
+refused while real questions still matched correctly. This threshold
+is tuned against one small synthetic manual — it has not been
+validated against a larger, real manual and would likely need
+retuning.
+
+## What this does not do
+- No semantic retrieval (see above) — will miss paraphrased or
+  indirect questions that don't share keywords with the clause.
+- No web interface. A CLI is an accepted format for this problem.
+- No handling of questions that require combining multiple clauses
+  (e.g. "if I'm late reporting AND my application is incomplete") —
+  it retrieves a single best-matching clause only.
+- No logging/analytics of what questions get refused, which would be
+  the natural next step for spotting manual gaps.
+
+## What I'd fix first with more time
+Swap TF-IDF for a local embedding model so paraphrased questions
+match correctly, and add multi-clause retrieval for compound
+questions.
