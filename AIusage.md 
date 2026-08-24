@@ -1,0 +1,14 @@
+# AI Usage
+
+Built with Claude (Anthropic) under significant time pressure —
+Claude wrote the initial retrieval logic, the synthetic policy
+manual, and the confidence-threshold refusal path. Claude also
+found and fixed a bug during testing (threshold of 0.15 let an
+off-topic question false-match a real clause; raised to 0.20 and
+re-tested).
+
+Before submitting, I read through app.py and can explain: how
+clauses are parsed from the manual (regex on headers), how TF-IDF
+similarity scoring works, why the threshold is set where it is, and
+why answers return the clause text directly instead of an
+LLM-generated rephrase.
